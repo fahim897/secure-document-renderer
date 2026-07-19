@@ -1,6 +1,6 @@
 FROM mcr.microsoft.com/playwright/python:v1.45.0-jammy
 
-# Install Bengali/Indic fonts and shaping libraries
+# Install Bengali/Indic fonts, shaping libraries, and wget
 USER root
 RUN apt-get update && apt-get install -y \
     fonts-beng \
@@ -8,13 +8,14 @@ RUN apt-get update && apt-get install -y \
     fonts-indic \
     fonts-noto-core \
     fontconfig \
+    wget \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy our custom local fonts (Nikosh and Kalpurush) to the system font directory
-COPY fonts/ /usr/share/fonts/truetype/
-
-# Force update font cache to recognize Nikosh and Kalpurush natively
-RUN fc-cache -f -v
+# Download Nikosh and Kalpurush directly into the system fonts directory
+RUN mkdir -p /usr/share/fonts/truetype/custom \
+    && wget -O /usr/share/fonts/truetype/custom/Nikosh.ttf "https://sonnetdp.github.io/nikosh/fonts/Nikosh.ttf" \
+    && wget -O /usr/share/fonts/truetype/custom/Kalpurush.ttf "https://fonts.maateen.me/kalpurush/Kalpurush-v0.258.ttf" \
+    && fc-cache -f -v
 
 WORKDIR /app
 
